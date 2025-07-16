@@ -62,8 +62,6 @@ This is done automatically by `prepare.sh`, but you can run manually:
 - `shake128.cpp`, `shake128.h` - Keccak/SHAKE128 implementation for key scheduling
 - `constant.cpp`, `constant.h` - S-Box, inverse S-Box, and Galois Field multiplication tables
 - `prepare.sh` - Build and setup script
-- `master_key.bin` - Generated master key (binary)
-- `WB_SBOX.bin` - Generated white-box S-Box (binary)
 
 ## To-do lists
 - Support SPNbox-16, SPNbox-24, SPNbox-32.
