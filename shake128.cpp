@@ -1,3 +1,6 @@
+// shake128.cpp - Keccak/SHAKE128 permutation and hash implementation
+//
+// Implements the Keccak-p permutation, SHAKE128, and related utilities for key scheduling in whitebox SPN.
 #include <stdint.h>
 #include <stdio.h>
 #include <inttypes.h>
@@ -7,6 +10,8 @@
 #include <iomanip>
 #include <fstream>
 #include <vector>
+
+#include "shake128.h"
 
 using namespace std;
 
@@ -141,7 +146,7 @@ void rnd(uint64_t * A, int ir)
 	iota(A,ir);
 }
 
-void Keccakp(int nr, vector<u_char> &S)
+void Keccakp(int nr, vector<unsigned char> &S)
 {
 	int l =6;
 	uint64_t A[25]  = {0};
@@ -158,7 +163,7 @@ void Keccakp(int nr, vector<u_char> &S)
 		rnd(A,ir);
 	}
 	
-	u_char mask = 0xff;
+	unsigned char mask = 0xff;
 	for(int i=0; i<25; i++)
 	{
 		for(int j=0; j<8; j++)
@@ -169,7 +174,7 @@ void Keccakp(int nr, vector<u_char> &S)
 
 }
 
-void pad0star_1(int x, int m, vector<u_char> &out)
+void pad0star_1(int x, int m, vector<unsigned char> &out)
 {
 	m-=4; //We already added the prefix
 	int j = ((-m-2)%x+x)%x;
@@ -182,14 +187,14 @@ void pad0star_1(int x, int m, vector<u_char> &out)
 	
 } 
 
-void sponge(vector<u_char>  &N, int d_in_bytes, int r, vector<u_char>  &out)
+void sponge(vector<unsigned char>  &N, int d_in_bytes, int r, vector<unsigned char>  &out)
 {
 	pad0star_1(r, 8 * N.size(), N);
 
 	int n = (8*N.size())/r;
 	int c = 1600-r;
 
-	vector<u_char>  S(200,0);
+	vector<unsigned char>  S(200,0);
 
 	
 	for(int i=0; i<n; i++)
@@ -199,7 +204,7 @@ void sponge(vector<u_char>  &N, int d_in_bytes, int r, vector<u_char>  &out)
 		Keccakp(24,S);
 	}
 
-	vector<u_char> Z;
+	vector<unsigned char> Z;
 
 	while(Z.size() < d_in_bytes)
 	{
@@ -207,20 +212,20 @@ void sponge(vector<u_char>  &N, int d_in_bytes, int r, vector<u_char>  &out)
 		Keccakp(24,S);
 	}
 
-	vector<u_char> rep(Z.begin(), Z.begin()+ d_in_bytes);
+	vector<unsigned char> rep(Z.begin(), Z.begin()+ d_in_bytes);
 	out.clear();
 	out = rep;
 }
 
 
-void keccak(int c, vector<u_char> &S, int d, vector<u_char> &out)
+void keccak(int c, vector<unsigned char> &S, int d, vector<unsigned char> &out)
 {
 	sponge(S, d, 1600-c, out);
 }
 
-void shake128(vector<u_char> in, int d, vector<u_char> &out)
+void shake128(vector<unsigned char> in, int d, vector<unsigned char> &out)
 {
-	u_char pad = 0x1f;
+	unsigned char pad = 0x1f;
 	in.push_back(pad);
 	keccak(256, in, d, out);
 }
